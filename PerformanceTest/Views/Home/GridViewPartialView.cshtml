@@ -1,0 +1,66 @@
+@using DevExpress.XtraGrid
+@model PerformanceTest.Models.CustomerViewModel
+
+@Html.DevExpress().GridView(
+    settings =>
+    {
+        settings.Name = "GridViewTest";
+        settings.EnableRowsCache = true;
+        settings.CallbackRouteValues = new { Controller = "Home", Action = "GridViewPartialView" };
+
+        settings.Width = Unit.Percentage(100);
+        settings.SettingsPager.PageSize = 15;
+        settings.SettingsPager.AlwaysShowPager = true;
+
+        settings.ControlStyle.Paddings.Padding = Unit.Pixel(0);
+        settings.ControlStyle.Border.BorderWidth = Unit.Pixel(0);
+        settings.ControlStyle.BorderBottom.BorderWidth = Unit.Pixel(1);
+
+        settings.Styles.Header.Wrap = DefaultBoolean.True;
+        settings.Styles.Cell.Wrap = DefaultBoolean.True;
+
+        settings.Settings.ShowFilterRow = true;
+        settings.Settings.ShowFilterRowMenu = true;
+        settings.SettingsBehavior.FilterRowMode = GridViewFilterRowMode.Auto;
+
+        settings.Columns.Add("Name").SortAscending();
+        settings.Columns.Add(column =>
+        {
+            column.FieldName = "Type";
+            column.Caption = "Type";
+            column.Width = 120;
+
+            column.Settings.ShowFilterRowMenu = DefaultBoolean.False;
+
+            column.ColumnType = MVCxGridViewColumnType.ComboBox;
+            ComboBoxProperties comboBoxProperties = (ComboBoxProperties)column.PropertiesEdit;
+            comboBoxProperties.ValueType = typeof(byte);
+            comboBoxProperties.DropDownStyle = DropDownStyle.DropDownList;
+
+            comboBoxProperties.Items.Add("All", string.Empty);
+            comboBoxProperties.Items.Add("长期客户", "1");
+            comboBoxProperties.Items.Add("临时客户", "0");
+        });
+        settings.Columns.Add("RegionName").Settings.SortMode = ColumnSortMode.DisplayText;
+        settings.Columns.Add("PriorityName").Settings.SortMode = ColumnSortMode.DisplayText;
+        settings.Columns.Add(column =>
+        {
+            column.FieldName = "FirstUser.Name";
+            column.Caption = "User Name";
+            column.Width = 120;
+        });
+        settings.Columns.Add("FirstUser.IsEnabled").Width = 110;
+        settings.Columns.Add("Address");
+        settings.Columns.Add("Phone");
+
+        settings.CustomJSProperties = (s, e) =>
+        {
+            ASPxGridView grid = (ASPxGridView)s;
+            e.Properties["cpGridFilterExpression"] = grid.FilterExpression;
+        };
+
+    }).BindToLINQ(string.Empty, string.Empty, (x, e) =>
+    {
+        e.KeyExpression = "Id";
+        e.QueryableSource = Model.Customer;
+    }).GetHtml()

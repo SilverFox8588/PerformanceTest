@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="75c8b7c88cf94280b8f922befa4a4667" Name="Diagram1">
+        <EntityTypeShape EntityType="PerformanceTestModel.Customer" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="PerformanceTestModel.CustomerResponsibleUser" Width="1.5" PointX="5.25" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="PerformanceTestModel.LoginUser" Width="1.5" PointX="3" PointY="5.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="PerformanceTestModel.Priority" Width="1.5" PointX="0.75" PointY="1.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="PerformanceTestModel.Region" Width="1.5" PointX="0.75" PointY="5.875" IsExpanded="true" />
+        <AssociationConnector Association="PerformanceTestModel.FK_Customer_PriorityId_Priority_Id" ManuallyRouted="false" />
+        <AssociationConnector Association="PerformanceTestModel.FK_Customer_RegionId_Region_Id" ManuallyRouted="false" />
+        <AssociationConnector Association="PerformanceTestModel.FK_CustomerResponsibleUser_CustomerId_Customer_Id" ManuallyRouted="false" />
+        <AssociationConnector Association="PerformanceTestModel.FK_CustomerResponsibleUser_UserId_User_Id" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

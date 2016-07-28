@@ -1,0 +1,30 @@
+@model PerformanceTest.Models.CustomerViewModel
+
+@Html.DevExpress().GridView(
+    settings =>
+    {
+        settings.Name = "GridViewTotal";
+        settings.CallbackRouteValues = new { Controller = "Home", Action = "AggregateInfo" };
+        settings.ClientSideEvents.BeginCallback = "GridViewTotal_OnBeginCallback";
+
+        settings.Width = Unit.Percentage(100);
+        settings.SettingsPager.PageSize = 10;
+        settings.SettingsPager.AlwaysShowPager = true;
+
+        settings.ControlStyle.Paddings.Padding = Unit.Pixel(0);
+        settings.ControlStyle.Border.BorderWidth = Unit.Pixel(0);
+        settings.ControlStyle.BorderBottom.BorderWidth = Unit.Pixel(1);
+
+        settings.Styles.Header.Wrap = DefaultBoolean.True;
+        settings.Styles.Cell.Wrap = DefaultBoolean.True;
+
+        settings.Columns.Add("RegionName");
+        settings.Columns.Add("TotalCustomers");
+        settings.Columns.Add("TotalHours");
+        settings.Columns.Add("TotalCost");
+        settings.Columns.Add("Priority_紧急_Type_0");
+        settings.Columns.Add("Priority_紧急_Type_1");
+        settings.Columns.Add("Priority_重要_Type_0");
+        settings.Columns.Add("Priority_重要_Type_1");
+
+    }).Bind(Model.CustomerAggregateInfo).GetHtml()

@@ -1,0 +1,22 @@
+@model PerformanceTest.Models.CustomerViewModel
+
+<script>
+    function btnAggregate_OnClick(s, e) {
+        GridViewTotal.PerformCallback();
+    }
+
+    function GridViewTotal_OnBeginCallback(s, e) {
+        e.customArgs['filters'] = GridViewTest.cpGridFilterExpression;
+    }
+</script>
+
+@Html.Partial("GridViewPartialView", Model)
+
+@Html.DevExpress().Button(settings=>
+{
+    settings.Name = "btnAggregate";
+    settings.Text = "Aggregate";
+    settings.ClientSideEvents.Click = "btnAggregate_OnClick";
+}).GetHtml()
+
+@Html.Partial("AggregateInfo", Model)
