@@ -5,6 +5,7 @@ using System.Data.Entity.Infrastructure;
 using Domain;
 using Repository;
 using System.Linq;
+using System.Reflection;
 
 namespace Services
 {
@@ -80,9 +81,9 @@ namespace Services
             return result;
         }
 
-        public List<CustomerAggregateInfo> GetCustomerAggregateInfo(IQueryable<CustomerDomainModel> source)
+        public List<CustomerAggregateInfo> GetCustomerAggregateInfoByFunction(IQueryable<CustomerDomainModel> source)
         {
-            string sql = GetSqlStringFromIQueryableCustomer(source);
+            string sql = GetSqlStringByFunction(source);
             List<CustomerAggregateInfo> result;
             using (Entities context = new Entities())
             {
@@ -90,10 +91,10 @@ namespace Services
                 SELECT [RegionName], 
                     SUM([Hours]) [TotalHours],
                     SUM([Cost]) [TotalCost],
-                    SUM(CASE WHEN [PriorityName] = {1} AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_紧急_Type_0],
-                    SUM(CASE WHEN [PriorityName] = {1} AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_紧急_Type_1],
-                    SUM(CASE WHEN [PriorityName] = {2} AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_重要_Type_0],
-                    SUM(CASE WHEN [PriorityName] = {2} AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_重要_Type_1]
+                    SUM(CASE WHEN [PriorityName] = N'{1}' AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_紧急_Type_0],
+                    SUM(CASE WHEN [PriorityName] = N'{1}' AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_紧急_Type_1],
+                    SUM(CASE WHEN [PriorityName] = N'{2}' AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_重要_Type_0],
+                    SUM(CASE WHEN [PriorityName] = N'{2}' AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_重要_Type_1]
                 FROM [SourceCustomer] GROUP BY [RegionName]", sql,
                "紧急", "重要");
 
@@ -103,7 +104,30 @@ namespace Services
             return result;
         }
 
-        private string GetSqlStringFromIQueryableCustomer(IQueryable<CustomerDomainModel> source)
+        public List<CustomerAggregateInfo> GetCustomerAggregateInfo(IQueryable<CustomerDomainModel> source)
+        {
+            string sql = GetSqlStringFromIQueryable(source);
+            List<CustomerAggregateInfo> result;
+            using (Entities context = new Entities())
+            {
+                string exeSql = string.Format(@"WITH [SourceCustomer] AS ({0}) 
+                SELECT [Name1] AS [RegionName], 
+                    SUM([Hours]) [TotalHours],
+                    SUM([Cost]) [TotalCost],
+                    SUM(CASE WHEN [C1] = N'{1}' AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_紧急_Type_0],
+                    SUM(CASE WHEN [C1] = N'{1}' AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_紧急_Type_1],
+                    SUM(CASE WHEN [C1] = N'{2}' AND [Type] = 0 THEN 1 ELSE 0 END) [Priority_重要_Type_0],
+                    SUM(CASE WHEN [C1] = N'{2}' AND [Type] = 1 THEN 1 ELSE 0 END) [Priority_重要_Type_1]
+                FROM [SourceCustomer] GROUP BY [Name1]", sql,
+               "紧急", "重要");
+
+                result = context.Database.SqlQuery<CustomerAggregateInfo>(exeSql).ToList();
+            }
+
+            return result;
+        }
+
+        private string GetSqlStringByFunction(IQueryable<CustomerDomainModel> source)
         {
             string sql = null;
             ObjectQuery<CustomerDomainModel> objectQuery = source as ObjectQuery<CustomerDomainModel>;
@@ -138,11 +162,59 @@ namespace Services
             }
             else
             {
-
-                sql = source.ToString();
+                sql = GetSqlStringFromIQueryable(source);
             }
 
             return sql;
+        }
+
+        public string GetSqlStringFromIQueryable<TEntity>(IQueryable<TEntity> queryable) where TEntity : class
+        {
+            try
+            {
+                var dbQuery = queryable as DbQuery<TEntity>;
+
+                // get the IInternalQuery internal variable from the DbQuery object
+                var iqProp = dbQuery.GetType().GetProperty("InternalQuery", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                var iq = iqProp.GetValue(dbQuery);
+
+                // get the ObjectQuery internal variable from the IInternalQuery object
+                var oqProp = iq.GetType().GetProperty("ObjectQuery", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                var oq = oqProp.GetValue(iq);
+
+                var objectQuery = oq as ObjectQuery<TEntity>;
+
+                var sqlString = objectQuery.ToTraceString();
+
+                foreach (var objectParam in objectQuery.Parameters)
+                {
+                    if (objectParam.ParameterType == typeof(string) || objectParam.ParameterType == typeof(DateTime) || objectParam.ParameterType == typeof(DateTime?))
+                    {
+                        sqlString = sqlString.Replace(string.Format("@{0}", objectParam.Name), string.Format("'{0}'", objectParam.Value.ToString()));
+                    }
+                    else if (objectParam.ParameterType == typeof(bool) || objectParam.ParameterType == typeof(bool?))
+                    {
+                        bool val;
+                        if (Boolean.TryParse(objectParam.Value.ToString(), out val))
+                        {
+                            sqlString = sqlString.Replace(string.Format("@{0}", objectParam.Name), string.Format("{0}", val ? 1 : 0));
+                        }
+                    }
+                    else
+                    {
+                        sqlString = sqlString.Replace(string.Format("@{0}", objectParam.Name), string.Format("{0}", objectParam.Value.ToString()));
+                    }
+                }
+
+                return sqlString;
+            }
+            catch (Exception)
+            {
+                //squash it and just return ToString
+                return queryable.ToString();
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-@model PerformanceTest.Models.CustomerViewModel
+锘緻model PerformanceTest.Models.CustomerViewModel
 
 @Html.DevExpress().GridView(
     settings =>
@@ -19,12 +19,11 @@
         settings.Styles.Cell.Wrap = DefaultBoolean.True;
 
         settings.Columns.Add("RegionName");
-        settings.Columns.Add("TotalCustomers");
         settings.Columns.Add("TotalHours");
         settings.Columns.Add("TotalCost");
-        settings.Columns.Add("Priority_紧急_Type_0");
-        settings.Columns.Add("Priority_紧急_Type_1");
-        settings.Columns.Add("Priority_重要_Type_0");
-        settings.Columns.Add("Priority_重要_Type_1");
+        settings.Columns.Add("Priority_绱ф�Type_0");
+        settings.Columns.Add("Priority_绱ф�Type_1");
+        settings.Columns.Add("Priority_閲嶈_Type_0");
+        settings.Columns.Add("Priority_閲嶈_Type_1");
 
     }).Bind(Model.CustomerAggregateInfo).GetHtml()
