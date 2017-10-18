@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Data.Entity.Core.Objects;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Linq;
@@ -23,8 +23,8 @@ namespace PerformanceTest.Controllers
         public ActionResult GridViewPartialView()
         {
             var service = new CommonService();
-            //var viewModel = new CustomerViewModel { Customer = service.GetCustomers() };
-            var viewModel = new CustomerViewModel { Customer = service.GetCustomersByFunction() };
+            var viewModel = new CustomerViewModel { Customer = service.GetCustomers() };
+            //var viewModel = new CustomerViewModel { Customer = service.GetCustomersByFunction() };
             return PartialView("GridViewPartialView", viewModel);
         }
 
@@ -32,6 +32,7 @@ namespace PerformanceTest.Controllers
         {
             var service = new CommonService();
             var source = service.GetCustomers();
+            //var source = service.GetCustomersByFunction();
             CriteriaOperator filterCriteria = CriteriaOperator.Parse(filters);
             CriteriaToExpressionConverter converter = new CriteriaToExpressionConverter();
 
@@ -40,23 +41,10 @@ namespace PerformanceTest.Controllers
                 source = source.AppendWhere(converter, filterCriteria) as IQueryable<CustomerDomainModel>;
             }
 
-            source = source?.Where(x => x.PriorityName == "½ô¼±" || x.PriorityName == "ÖØÒª");
+            source = source?.Where(x => x.PriorityName == "é‡è¦" || x.PriorityName == "ç´§æ€¥");
             var results = service.GetCustomerAggregateInfo(source);
+            //var results = service.GetCustomerAggregateInfoByFunction(source);
 
-            //var results = from c in source
-            //              group c by c.RegionName
-            //              into g
-            //              select new CustomerAggregateInfo
-            //              {
-            //                  RegionName = g.Key,
-            //                  TotalCustomers = g.Count(),
-            //                  TotalHours = g.Sum(x => x.Hours),
-            //                  TotalCost = g.Sum(x => x.Cost),
-            //                  Priority_½ô¼±_Type_0 = g.Count(x => x.PriorityName == "½ô¼±" && x.Type == 0),
-            //                  Priority_½ô¼±_Type_1 = g.Count(x => x.PriorityName == "½ô¼±" && x.Type == 1),
-            //                  Priority_ÖØÒª_Type_0 = g.Count(x => x.PriorityName == "ÖØÒª" && x.Type == 0),
-            //                  Priority_ÖØÒª_Type_1 = g.Count(x => x.PriorityName == "ÖØÒª" && x.Type == 1),
-            //              };
             var viewModel = new CustomerViewModel { CustomerAggregateInfo = results.ToList() };
 
             return PartialView("AggregateInfo", viewModel);
