@@ -1,3 +1,4 @@
+using System;
 using System.Data.Entity.Core.Objects;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Linq;
@@ -59,6 +60,19 @@ namespace PerformanceTest.Controllers
             var viewModel = new CustomerViewModel { CustomerAggregateInfo = results.ToList() };
 
             return PartialView("AggregateInfo", viewModel);
+        }
+
+ 
+        public ActionResult PartialRefresh(int sectionid, string questions)
+        {
+            try
+            {             
+                return PartialView("test", string.Format("{0}_{1}", sectionid, questions));
+            }
+            catch (Exception exp)
+            {
+                throw exp;
+            }
         }
     }
 }

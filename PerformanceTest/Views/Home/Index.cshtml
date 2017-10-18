@@ -1,12 +1,45 @@
 @model PerformanceTest.Models.CustomerViewModel
 
 <script>
+    var counter = 0;
     function btnAggregate_OnClick(s, e) {
         GridViewTotal.PerformCallback();
     }
 
     function GridViewTotal_OnBeginCallback(s, e) {
         e.customArgs['filters'] = GridViewTest.cpGridFilterExpression;
+    }
+
+    function clickTest() {
+        $("#test1").load("Home/PartialRefresh", { "sectionid": "1", "questions": "ted" }, function (s, e) {
+            counter = counter + 1;
+            alert('Counter: ' + counter);
+        });
+
+        $("#test1").load("Home/PartialRefresh", { "sectionid": "1", "questions": "ted" }, function (s, e) {
+            counter = counter + 1;
+            alert('Counter: ' + counter);
+        });
+
+        $("#test1").load("Home/PartialRefresh", { "sectionid": "1", "questions": "ted" }, function (s, e) {
+            counter = counter + 1;
+            alert('Counter: ' + counter);
+        });
+        //$.ajax({
+        //    url: "Home/PartialRefresh",
+        //    type: "Post",
+        //    data: {
+        //        "sectionid": "1",
+        //        "questions": "ted"
+        //    },
+        //    success: function (data) {
+        //        //$("#test1").html(data);
+        //        $('#test1').empty().append(data);
+        //    },
+        //    error: function (XMLHttpRequest, textStatus, errorThrown) {
+        //        alert("±£¥Ê ß∞‹£∫" + errorThrown);
+        //    }
+        //});
     }
 </script>
 
@@ -19,4 +52,13 @@
     settings.ClientSideEvents.Click = "btnAggregate_OnClick";
 }).GetHtml()
 
+@Html.DevExpress().Button(settings =>
+{
+    settings.Name = "btnTestPartRefresh";
+    settings.Text = "Partial Refresh";
+    settings.ClientSideEvents.Click = "clickTest";
+}).GetHtml()
+
 @Html.Partial("AggregateInfo", Model)
+
+<div id="test1"></div>
